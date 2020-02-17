@@ -12,7 +12,9 @@ class MainViewModel(private val remoteRepository: RemoteRepository) : ViewModel(
 
     val compositeDisposable = CompositeDisposable()
     val userList = MutableLiveData<List<ItemsItem>>()
+    val errorMessage = MutableLiveData<String>()
 
+    @Synchronized
     fun setUserList(userName: String) {
         remoteRepository.api().getUsers(userName)
             .subscribeOn(Schedulers.io())
@@ -26,9 +28,11 @@ class MainViewModel(private val remoteRepository: RemoteRepository) : ViewModel(
                         }
                     }
                     userList.value = listOfUser
+                } else {
+                    errorMessage.value = "no user found"
                 }
             }, { throwable ->
-                throwable.printStackTrace()
+                errorMessage.value = throwable.toString()
             }).also {
                 compositeDisposable.add(it)
             }
