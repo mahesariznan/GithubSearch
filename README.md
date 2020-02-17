@@ -12,3 +12,5 @@ Project Specifications
 3. Implementing Manual Dependency Injection
 4. Implementing TextWatcher
 5. Pagination for load api
+6. Implementing error handling
+
