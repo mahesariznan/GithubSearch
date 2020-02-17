@@ -32,4 +32,24 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
+    //Retrofit
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+    implementation("com.squareup.retrofit2:retrofit:$retrofit_version") {
+        exclude group: "com.squareup.okhttp3"
+    }
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation("com.squareup.retrofit2:adapter-rxjava2:$retrofit_version") {
+        exclude module: "rxjava"
+    }
+    //RxJava2
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    //Glide
+    implementation "com.github.bumptech.glide:glide:$glide_version"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
+    //Testing
+    testImplementation 'android.arch.core:core-testing:1.1.1'
 }
