@@ -2,20 +2,20 @@ package com.iznan.githubsearch.ui
 
 import android.os.Bundle
 import android.text.Editable
-import android.text.TextUtils
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.iznan.githubsearch.R
 import com.iznan.githubsearch.model.ItemsItem
 import com.iznan.githubsearch.util.Constant.Companion.ERROR_FORBIDEN_403
 import com.iznan.githubsearch.util.Constant.Companion.ERROR_NO_INTERNET_CONNECTION
-import com.iznan.githubsearch.util.Constant.Companion.NAME_CANNOT_EMPTY
 import com.iznan.githubsearch.util.Constant.Companion.PLEASE_TURN_ON_YOUR_INTERNET_CONNECTION
 import com.iznan.githubsearch.util.Constant.Companion.PLEASE_WAIT_10_SECOND_AND_TRY_AGAIN
 import com.iznan.githubsearch.util.Constant.Companion.USER_NOT_FOUND
+import com.iznan.githubsearch.util.OnVerticalScrollListener
 import com.iznan.githubsearch.util.SearchTextWatcher
 import com.iznan.githubsearch.viewModel.ViewModelFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -31,19 +31,7 @@ class MainActivity : AppCompatActivity() {
         mainViewModel = obtainViewModel()
         setupRecyclerView()
         editText_name.addTextChangedListener(nameWatcher)
-
         observeViewModel()
-        searchButton.setOnClickListener {
-            val name = editText_name.text.toString()
-            when (!TextUtils.isEmpty(name)) {
-                true -> mainViewModel.setUserList(name)
-                false -> {
-                    textView_error.setText(NAME_CANNOT_EMPTY)
-                    textView_error.visibility = View.VISIBLE
-                }
-            }
-
-        }
     }
 
     private fun observeViewModel(){
@@ -53,7 +41,6 @@ class MainActivity : AppCompatActivity() {
             textView_error.visibility = View.GONE
             progressBar.visibility = View.GONE
             editText_name.isEnabled = true
-            searchButton.isEnabled = true
         })
 
         mainViewModel.errorMessage.observe(this, Observer<String> {
@@ -66,10 +53,17 @@ class MainActivity : AppCompatActivity() {
             } else {
                 textView_error.setText(it)
             }
-            searchButton.isEnabled = true
             progressBar.visibility = View.GONE
             rc.visibility = View.GONE
             textView_error.visibility = View.VISIBLE
+            editText_name.isEnabled = true
+        })
+
+        mainViewModel.moreUserList.observe(this, Observer<List<ItemsItem>> {
+            adapter.addData(it)
+            rc.visibility = View.VISIBLE
+            textView_error.visibility = View.GONE
+            progressBar.visibility = View.GONE
             editText_name.isEnabled = true
         })
     }
@@ -78,12 +72,10 @@ class MainActivity : AppCompatActivity() {
         override fun typingStateStopped(s: Editable?) {
             if (!s.isNullOrBlank()) {
                 editText_name.isEnabled = false
-                searchButton.isEnabled = false
                 mainViewModel.setUserList(s.toString())
                 progressBar.visibility = View.VISIBLE
             } else {
                 editText_name.isEnabled = true
-                searchButton.isEnabled = true
                 progressBar.visibility = View.GONE
             }
         }
@@ -92,6 +84,15 @@ class MainActivity : AppCompatActivity() {
     fun setupRecyclerView() {
         rc.layoutManager = LinearLayoutManager(this)
         rc.adapter = adapter
+        rc.addOnScrollListener(scrollListener)
+    }
+
+    private val scrollListener = object : OnVerticalScrollListener() {
+        override fun onScrolledToVeryTop(recyclerView: RecyclerView) {}
+
+        override fun onScrolledToVeryBottom(recyclerView: RecyclerView) {
+            mainViewModel.loadMore()
+        }
     }
 
     private fun obtainViewModel(): MainViewModel {

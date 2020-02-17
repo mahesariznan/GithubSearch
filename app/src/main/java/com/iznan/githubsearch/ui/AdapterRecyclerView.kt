@@ -47,4 +47,11 @@ class AdapterRecyclerView : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
         notifyDataSetChanged()
     }
+
+    fun addData(newData: List<ItemsItem>) {
+        if (newData.isNotEmpty()) {
+            data.addAll(newData)
+        }
+        notifyDataSetChanged()
+    }
 }
